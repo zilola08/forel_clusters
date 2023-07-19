@@ -41,20 +41,25 @@ def forel(data, r):
         indexes_to_delete = []
 
         # find all points which have less or equal to r distance
-        for i in range(len(remaining_indices)):
+        for h in range(100):
+          centroidCopy = centroid.copy()
+          arr_selected_els = []
+          indexes_to_delete = []
+          
+          for i in range(len(remaining_indices)):
             dist = euclideandistance(data[remaining_indices[i]], centroid)
             
             if dist <= r:
-            #   label them
-              labels[remaining_indices[i]] = cluster_num
-            #   add them to sep array (for later calc of their mean)
-              arr_selected_els.append(data.tolist()[i])
-            #   save their indices (to delete them afterwards from the pool)
               indexes_to_delete.append(remaining_indices[i])
 
+          for i in range(len(indexes_to_delete)):
+            #   label them
+              labels[indexes_to_delete[i]] = cluster_num
+            #   add them to sep array (for later calc of their mean)
+              arr_selected_els.append(data.tolist()[indexes_to_delete[i]])
+            #   save their indices (to delete them afterwards from the pool)
+
         # adjust the centroid of found cluster till stops changing
-        for h in range(100):
-          centroidCopy = centroid.copy()      
           centroid = mean(arr_selected_els)
 
           is_equal = True
@@ -67,6 +72,7 @@ def forel(data, r):
             centroids.append(centroid)
             break
 
+        print(indexes_to_delete)
         # delete already marked points from the pool
         for i in range(len(indexes_to_delete)):
             remaining_indices.remove(indexes_to_delete[i])
