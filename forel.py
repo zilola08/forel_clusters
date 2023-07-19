@@ -16,45 +16,60 @@ def mean(data):
 
     return means  
 
+def distance(num1, num2):
+    return (num1 - num2) ** 2
+
+def euclideandistance(objA, objB):
+    sumOfDistance = 0
+    for a, b in zip(objA, objB):
+        sumOfDistance += distance(a, b)
+
+    return sumOfDistance ** 0.5
+
 def forel(data, r):
     labels = [-1] * len(data)
     centroids = []
     cluster_num = 1
     remaining_indices = list(range(len(data)))
-    # print("remaining_indices: ", remaining_indices)
 
     while (len(remaining_indices)!=0):
+
+        # assign a random centroid from the points
         random_index = random.choice(remaining_indices)
         centroid = data[random_index]
-        centroidCopy = centroid.copy()
         arr_selected_els = []
         indexes_to_delete = []
 
+        # find all points which have less or equal to r distance
         for i in range(len(remaining_indices)):
-            dist = manhattan_distance(data[remaining_indices[i]], centroid)
+            dist = euclideandistance(data[remaining_indices[i]], centroid)
+            
             if dist <= r:
+            #   label them
               labels[remaining_indices[i]] = cluster_num
+            #   add them to sep array (for later calc of their mean)
               arr_selected_els.append(data.tolist()[i])
+            #   save their indices (to delete them afterwards from the pool)
               indexes_to_delete.append(remaining_indices[i])
-              
-              for h in range(100):
-                centroid = mean(arr_selected_els)
-                print(centroid)
 
-                is_equal = True
-                for i in range(len(centroid)):
-                  if centroid[i] != centroidCopy[i]:
-                    is_equal = False
+        # adjust the centroid of found cluster till stops changing
+        for h in range(100):
+          centroidCopy = centroid.copy()      
+          centroid = mean(arr_selected_els)
 
-                if is_equal:
-                  cluster_num+=1
-                  centroids.append(centroid)
-                  break
+          is_equal = True
+          for i in range(len(centroid)):
+            if centroid[i] != centroidCopy[i]:
+              is_equal = False
 
+          if is_equal:
+            cluster_num+=1
+            centroids.append(centroid)
+            break
+
+        # delete already marked points from the pool
         for i in range(len(indexes_to_delete)):
             remaining_indices.remove(indexes_to_delete[i])
-        # print("indexes_to_delete: ", indexes_to_delete)
-        # print("remaining_indices: ", remaining_indices)
 
     print(labels, centroids)
     return labels, centroids
@@ -66,7 +81,7 @@ data = np.concatenate([np.random.randn(50, 2) + [2, 2],
                        np.random.randn(50, 2) + [-2, -2],
                        np.random.randn(50, 2) + [2, -2]])
 
-labels, centroids = forel(data, 1)
+labels, centroids = forel(data, 3)
 
 # # Визуализация исходных данных
 if True:
